@@ -65,7 +65,61 @@
 受限于篇幅，这里仅贴出核心代码，其余地方以思路讲解为主。
 
 首先由简入繁，我们先尝试画出一个简单的甜甜圈：
-![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/2.png)
+
+```java
+public class AnimatedPieView extends View {
+    protected final String TAG = this.getClass().getSimpleName();
+
+    private Paint paint1;
+    private Paint paint2;
+    private Paint paint3;
+
+    RectF mDrawRectf = new RectF();
+
+
+    //其他构造器忽略
+    public AnimatedPieView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initView(context, attrs);
+    }
+
+
+    private void initView(Context context, AttributeSet attrs) {
+        paint1 = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        paint1.setStyle(Paint.Style.STROKE);
+        paint1.setStrokeWidth(80);
+        paint1.setColor(Color.RED);
+
+        paint2 = new Paint(paint1);
+        paint2.setColor(Color.GREEN);
+
+        paint3 = new Paint(paint1);
+        paint3.setColor(Color.BLUE);
+
+    }
+
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        final float width = getWidth() - getPaddingLeft() - getPaddingRight();
+        final float height = getHeight() - getPaddingTop() - getPaddingBottom();
+
+        canvas.translate(width / 2, height / 2);
+        //半径
+        final float radius = (float) (Math.min(width, height) / 2 * 0.85);
+        mDrawRectf.set(-radius, -radius, radius, radius);
+
+        canvas.drawArc(mDrawRectf, 0, 120, false, paint1);
+        canvas.drawArc(mDrawRectf, 120, 120, false, paint2);
+        canvas.drawArc(mDrawRectf, 240, 120, false, paint3);
+
+
+    }
+
+}
+```
 
 so easy~依然是开头所说的，3只笔，3个角度，完事。
 
@@ -93,7 +147,17 @@ so easy~依然是开头所说的，3只笔，3个角度，完事。
 
 根据以上条件，我们初步定义出一个接口：IPieInfo
 
-![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/5.png)
+```java
+public interface IPieInfo {
+
+    double getValue();
+
+    @ColorInt
+    int getColor();
+
+    String getDesc();
+}
+```
 
 在这之后，我们计算都可以依靠接口获取：
 
@@ -115,13 +179,39 @@ so easy~依然是开头所说的，3只笔，3个角度，完事。
 
 首先看看第一个问题，我们的甜甜圈虽然可以设置无限角度，但实际上其实归根结底可以归到0 ~ 360°之间，即便传入一个很大的值，其实也是一定倍数 * 360 + 偏移量而已，所以针对任意角度，我们需要将其收束到0 ~ 360°之间：
 
-![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/6.png)
+```java
+public class DegreeUtil {
+
+    public static float limitDegreeInTo360(double inputAngle) {
+        float result;
+        double tInputAngle = inputAngle - (int) inputAngle;//取小数
+        result = (float) ((int) inputAngle % 360.0f + tInputAngle);
+        return result < 0 ? 360.0f + result : result;
+    }
+}
+```
 
 在点击触发的时候，我们先判断点击的位置是否在甜甜圈（或者饼图）内，判断的方法也很简单，就是初中的技巧计算两点之间的直线距离。
 
 我们获取触摸点的x,y，计算其到中心的距离，假如当前是甜甜圈模式（环形饼图），则需要甜甜圈内径≤距离≤甜甜圈外径则判定在甜甜圈内。
 
-![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/7.png)
+```java
+        PieInfoWrapper pointToPieInfoWrapper(float x, float y) {
+            final boolean isStrokeMode = mConfig.isStrokeMode();
+            final float strokeWidth = mConfig.getStrokeWidth();
+            //外圆半径
+            final float exCircleRadius = isStrokeMode ? pieRadius + strokeWidth / 2 : pieRadius;
+            //内圆半径
+            final float innerCircleRadius = isStrokeMode ? pieRadius - strokeWidth / 2 : 0;
+            //点击位置到圆心的直线距离(没开根)
+            final double touchDistancePow = Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2);
+            //内圆半径<=直线距离<=外圆半径
+            final boolean isTouchInRing = touchDistancePow >= expandClickRange + Math.pow(innerCircleRadius, 2)
+                    && touchDistancePow <= expandClickRange + Math.pow(exCircleRadius, 2);
+            if (!isTouchInRing) return null;
+            return findWrapper(x, y);
+        }
+```
 
 计算完距离后，我们需要计算角度，我们通过角度来获取我们当前点击的是哪一段的甜甜圈。
 
@@ -141,9 +231,51 @@ so easy~依然是开头所说的，3只笔，3个角度，完事。
 
 接着我们根据角度寻找每一段甜甜圈里匹配的角度进行查询，直到找到为止。
 
-![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/9.png)
+```java
+        PieInfoWrapper findWrapper(float x, float y) {
+            //得到角度
+            double touchAngle = Math.toDegrees(Math.atan2(y - centerY, x - centerX));
+            if (touchAngle < 0) {
+                touchAngle += 360.0f;
+            }
+            if (lastTouchWrapper != null && lastTouchWrapper.containsTouch((float) touchAngle)) {
+                return lastTouchWrapper;
+            }
+            PLog.i("touch角度 = " + touchAngle);
+            for (PieInfoWrapper wrapper : mDataWrappers) {
+                if (wrapper.containsTouch((float) touchAngle)) {
+                    lastTouchWrapper = wrapper;
+                    return wrapper;
+                }
+            }
+            return null;
+        }
+```
 
-![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/10.png)
+```java
+    boolean containsTouch(float angle) {
+        //所有点击的角度都需要收归到0~360的范围，兼容任意角度
+        final float tAngle = DegreeUtil.limitDegreeInTo360(angle);
+        float tStart = DegreeUtil.limitDegreeInTo360(fromAngle);
+        float tEnd = DegreeUtil.limitDegreeInTo360(toAngle);
+        PLog.d("containsTouch  >>  tStart： " + tStart + "   tEnd： " + tEnd + "   tAngle： " + tAngle);
+        boolean result;
+        if (tEnd < tStart) {
+            if (tAngle > 180) {
+                //已经过界
+                result = tAngle >= tStart && (360 - tAngle) <= sweepAngle;
+            } else {
+                result = tAngle + 360 >= tStart && tAngle <= tEnd;
+            }
+        } else {
+            result = tAngle >= tStart && tAngle <= tEnd;
+        }
+        if (result) {
+            PLog.i("find touch point  >>  " + toString());
+        }
+        return result;
+    }
+```
 
 在查找的时候我们还需要注意转换为0 ~ 360的情况中有一种特殊情况，就是某段甜甜圈跨越了0和360的界限。比如说图中的情况：
 ![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/11.png)
@@ -171,11 +303,42 @@ so easy~依然是开头所说的，3只笔，3个角度，完事。
 
 那我们需要怎么做呢？实际上这也是三角函数的简单运用，根据效果图，文字指引线的起始点是在甜甜圈的中间，因此我们可以根据甜甜圈的中心点到某段甜甜圈的中间连线作为三角形的斜边，根据三角函数sin/cos求出x,y的坐标即可。
 
-![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/16.png)
+```java
+    private void drawText(Canvas canvas, PieInfoWrapper wrapper) {
+        if (wrapper == null) return;
+
+        //根据touch扩大量修正指示线和描述文字的位置
+        float fixPos = (wrapper.equals(mTouchHelper.floatingWrapper) ? getFixTextPos(wrapper) : 0) + (wrapper.equals(mTouchHelper.lastFloatWrapper) ? getFixTextPos(wrapper) : 0);
+
+        final float pointMargins = fixPos
+                + pieRadius
+                + mConfig.getGuideLineMarginStart()
+                + (mConfig.isStrokeMode() ? mConfig.getStrokeWidth() / 2 : 0);
+        float cx = (float) (pointMargins * Math.cos(Math.toRadians(wrapper.getMiddleAngle())));
+        float cy = (float) (pointMargins * Math.sin(Math.toRadians(wrapper.getMiddleAngle())));
+
+        //略
+
+    }
+```
 
 求出了文字指引线的起始点，我们就清楚该文字属于哪个象限了，简单的判断x,y即可
 
-![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/17.png)
+```java
+    private LineDirection calculateLineGravity(float startX, float startY) {
+        if (startX > 0) {
+            //在右边
+            return startY > 0 ? LineDirection.BOTTOM_RIGHT : LineDirection.TOP_RIGHT;
+        } else if (startX < 0) {
+            //在左边
+            return startY > 0 ? LineDirection.BOTTOM_LEFT : LineDirection.TOP_LEFT;
+        } else if (startY == 0) {
+            //刚好中间
+            return startX > 0 ? LineDirection.CENTER_RIGHT : LineDirection.CENTER_LEFT;
+        }
+        return LineDirection.TOP_RIGHT;
+    }
+```
 
 最后关于文字引导线的绘制，我们可以简单的PathMeasure使Path动态生长。
 
