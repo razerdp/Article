@@ -121,7 +121,7 @@ public class AnimatedPieView extends View {
 }
 ```
 
-so easy~依然是开头所说的，3只笔，3个角度，完事。
+so easy~依然是开头所说的，3只笔，3个角度，完事（极限一点，一支笔也可以完成【静态的情况下】）。
 
 ![](https://github.com/razerdp/Article/blob/master/pics/一起撸个甜甜圈/3.jpg)
 
