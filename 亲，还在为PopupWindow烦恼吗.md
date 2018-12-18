@@ -80,7 +80,7 @@ new DemoPopup(getContext()).showPopupWindow();
 
 这个问题就如MVP一样，为了更好地结构而不得不创建多一些类。。。
 
-BasePopup之所以 写成一个抽象类，除了更大程度的开放给开发者，更多的是让开发者更好地把功能内聚到PopupWindow中。
+BasePopup之所以 写成一个抽象类，除了更大程度的开放给开发者，更多的是让开发者更好地把功能内聚到PopupWindow中，而不是去解决PopupWindow的各种蛋疼的坑。
 
 当然，为了满足一些简单的PopupWindow实现而不希望又新建一个类，我们也提供了懒懒的方法支持链式使用：
 
