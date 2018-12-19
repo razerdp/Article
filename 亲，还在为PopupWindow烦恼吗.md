@@ -458,11 +458,17 @@ thanks
 
 仓库地址：https://github.com/razerdp/BasePopup
 
+***
+
+**18/12/19：candy版本更新到2.1.3-alpha，已经支持update~感谢支持**
+
 预览图：
 
 | [**GravityPopupFrag**](./app/src/main/java/razerdp/demo/fragment/basedemo/GravityPopupFrag.java)  | [**LocatePopupFrag**](./app/src/main/java/razerdp/demo/fragment/other/LocatePopupFrag.java) |
 | - | - |
 | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_gravity.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_locatepopup.gif) |
+| [**AnyPosPopupFrag**](./app/src/main/java/razerdp/demo/fragment/basedemo/AnyPosPopupFrag.java)  | [**UpdatePopupFrag**](./app/src/main/java/razerdp/demo/fragment/basedemo/UpdatePopupFrag.java) |
+| ![](https://github.com/razerdp/Pics/tree/master/BasePopup/wiki/anypos/anypos.gif) | ![](https://github.com/razerdp/Pics/tree/master/BasePopup/wiki/update/update.gif) |
 | [**BlurSlideFromBottomPopupFrag**](./app/src/main/java/razerdp/demo/popup/BlurSlideFromBottomPopup.java)  | [**CommentPopup**](./app/src/main/java/razerdp/demo/popup/CommentPopup.java) |
 | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_blur_from_bottom.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_comment.gif) |
 
