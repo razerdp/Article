@@ -437,6 +437,38 @@ abstract class BasePopupWindowProxy extends PopupWindow {
     }
 ```
 
+正因为位置有我们来控制，所以不仅仅在所有版本中统一了位置的计算方式，而且更重要的是，PopupWindow的`Gravity`这一个属性被充分使用，再也不用去计算心塞的偏移量了。
+
+举个例子，比如我们要显示在某个 view的右边，同时自己跟他垂直对齐。
+
+在系统的PopupWindow中，你可能要这么写：
+
+```java
+
+//前面忽略创建方法
+popup.showAsDropDown(v,v.getWidth(),-(v.getHeight()+popup.getHeight())>>1)
+```
+
+上面的代码还是比较简单的，popup默认显示在anchorView的下方，此处需要计算偏移量，使popup可以偏移到view的右方，但是有个值得关注的是popup在显示之前是获取不到正确的contentView的宽高的。
+
+
+而在BasePopup中，你要写的，仅仅是这样：
+
+```java
+
+//前面忽略创建方法
+popup.setPopupGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
+popup.showPopupWindow(anchorView);
+```
+
+在BasePopup中，因为layout由我们接管，因此在onLayout中我们其实是知道contentView的宽高，因此根据上面的代码，我们直接通过Gravity来计算出Popup的正确位置即可。
+
+**关于Gravity的Demo**：
+
+![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_gravity.gif)
+
+
+
 ##### 背景模糊
 
 同时我们可以针对这个自定义的ViewGroup默认添加背景，在BasePopup中，背景添加了一个ImageView和一个View，分别处理模糊和背景颜色。
@@ -464,12 +496,12 @@ thanks
 
 预览图：
 
-| [**GravityPopupFrag**](./app/src/main/java/razerdp/demo/fragment/basedemo/GravityPopupFrag.java)  | [**LocatePopupFrag**](./app/src/main/java/razerdp/demo/fragment/other/LocatePopupFrag.java) |
+| **anchorView绑定** | **不同方向弹出** |
 | - | - |
-| ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_gravity.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_locatepopup.gif) |
-| [**AnyPosPopupFrag**](./app/src/main/java/razerdp/demo/fragment/basedemo/AnyPosPopupFrag.java)  | [**UpdatePopupFrag**](./app/src/main/java/razerdp/demo/fragment/basedemo/UpdatePopupFrag.java) |
+| ![](https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/linkto/linkto.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_locatepopup.gif) |
+| **任意位置显示**  | **参考anchorView更新** |
 | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/anypos/anypos.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/update/update.gif) |
-| [**BlurSlideFromBottomPopupFrag**](./app/src/main/java/razerdp/demo/popup/BlurSlideFromBottomPopup.java)  | [**CommentPopup**](./app/src/main/java/razerdp/demo/popup/CommentPopup.java) |
+| **从下方弹出并模糊背景**  | **朋友圈评论弹窗** |
 | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_blur_from_bottom.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_comment.gif) |
 
 
