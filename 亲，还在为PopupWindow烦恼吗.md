@@ -465,7 +465,7 @@ popup.showPopupWindow(anchorView);
 
 **关于Gravity的Demo**：
 
-![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_gravity.gif)
+<img src="https://github.com/razerdp/Pics/blob/master/BasePopup/demo_gravity.gif" height="480"/>
 
 
 
@@ -498,11 +498,11 @@ thanks
 
 | **anchorView绑定** | **不同方向弹出** |
 | - | - |
-| ![](https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/linkto/linkto.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_locatepopup.gif) |
+| <img src="https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/linkto/linkto.gif" height="480"/> | <img src="https://github.com/razerdp/Pics/blob/master/BasePopup/demo_locatepopup.gif" height="480"/> |
 | **任意位置显示**  | **参考anchorView更新** |
-| ![](https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/anypos/anypos.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/update/update.gif) |
+| <img src="https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/anypos/anypos.gif" height="480"/> | <img src="https://github.com/razerdp/Pics/blob/master/BasePopup/wiki/update/update.gif" height="480"/> |
 | **从下方弹出并模糊背景**  | **朋友圈评论弹窗** |
-| ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_blur_from_bottom.gif) | ![](https://github.com/razerdp/Pics/blob/master/BasePopup/demo_comment.gif) |
+| <img src="https://github.com/razerdp/Pics/blob/master/BasePopup/demo_blur_from_bottom.gif" height="480"/> | <img src="https://github.com/razerdp/Pics/blob/master/BasePopup/demo_comment.gif" height="480"/> |
 
 
 
