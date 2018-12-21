@@ -400,41 +400,76 @@ abstract class BasePopupWindowProxy extends PopupWindow {
 而对于平时的PopupWindow用法，即PopupWindow不铺满整个屏幕，在BasePopup中则是跟普通用法一样计算offset。
 
 ```java
-    private void onCalculateOffsetAdjust(View anchorView, Point offset) {
-        if (anchorView != null) {
-            //由于showAsDropDown系统已经帮我们定位在view的下方，因此这里的offset我们仅需要做微量偏移
-
-            switch (getPopupGravity() & Gravity.HORIZONTAL_GRAVITY_MASK) {
-                case Gravity.LEFT:
-                case Gravity.START:
-                    offset.x += -getWidth();
-                    break;
-                case Gravity.RIGHT:
-                case Gravity.END:
-                    offset.x += mHelper.getAnchorViewWidth();
-                    break;
-                case Gravity.CENTER_HORIZONTAL:
-                    offset.x += (mHelper.getAnchorViewWidth() - getWidth()) >> 1;
-                    break;
-                default:
-                    break;
-            }
-
-            switch (getPopupGravity() & Gravity.VERTICAL_GRAVITY_MASK) {
-                case Gravity.TOP:
-                    offset.y += -(mHelper.getAnchorHeight() + getHeight());
-                    break;
-                case Gravity.BOTTOM:
-                    //系统默认就在下面.
-                    break;
-                case Gravity.CENTER_VERTICAL:
-                    offset.y += -((getHeight() + mHelper.getAnchorHeight()) >> 1);
-                    break;
-                default:
-                    break;
-            }
+	private void onCalculateOffsetAdjust(Point offset, boolean positionMode, boolean relativeToAnchor) {
+        int leftMargin = 0;
+        int topMargin = 0;
+        int rightMargin = 0;
+        int bottomMargin = 0;
+        if (mHelper.getParaseFromXmlParams() != null) {
+            leftMargin = mHelper.getParaseFromXmlParams().leftMargin;
+            topMargin = mHelper.getParaseFromXmlParams().topMargin;
+            rightMargin = mHelper.getParaseFromXmlParams().rightMargin;
+            bottomMargin = mHelper.getParaseFromXmlParams().bottomMargin;
         }
-    }
+        //由于showAsDropDown系统已经帮我们定位在view的下方，因此这里的offset我们仅需要做微量偏移
+        switch (getPopupGravity() & Gravity.HORIZONTAL_GRAVITY_MASK) {
+            case Gravity.LEFT:
+            case Gravity.START:
+                if (relativeToAnchor) {
+                    offset.x += -getWidth() + leftMargin;
+                } else {
+                    offset.x += leftMargin;
+                }
+                break;
+            case Gravity.RIGHT:
+            case Gravity.END:
+                if (relativeToAnchor) {
+                    offset.x += mHelper.getAnchorViewWidth() + leftMargin;
+                } else {
+                    offset.x += getScreenWidth() - getWidth() - rightMargin;
+                }
+                break;
+            case Gravity.CENTER_HORIZONTAL:
+                if (relativeToAnchor) {
+                    offset.x += (mHelper.getAnchorViewWidth() - getWidth()) >> 1;
+                } else {
+                    offset.x += ((getScreenWidth() - getWidth()) >> 1) + leftMargin - rightMargin;
+                }
+                break;
+            default:
+                if (!relativeToAnchor) {
+                    offset.x += leftMargin;
+                }
+                break;
+        }
+
+        switch (getPopupGravity() & Gravity.VERTICAL_GRAVITY_MASK) {
+            case Gravity.TOP:
+                if (relativeToAnchor) {
+                    offset.y += -(mHelper.getAnchorHeight() + getHeight()) + topMargin;
+                } else {
+                    offset.y += topMargin;
+                }
+                break;
+            case Gravity.BOTTOM:
+                //系统默认就在下面.
+                if (!relativeToAnchor) {
+                    offset.y += getScreenHeight() - getHeight() - bottomMargin;
+                }
+                break;
+            case Gravity.CENTER_VERTICAL:
+                if (relativeToAnchor) {
+                    offset.y += -((getHeight() + mHelper.getAnchorHeight()) >> 1);
+                } else {
+                    offset.y += ((getScreenHeight() - getHeight()) >> 1) + topMargin - bottomMargin;
+                }
+                break;
+            default:
+                if (!relativeToAnchor) {
+                    offset.y += topMargin;
+                }
+                break;
+        }
 ```
 
 正因为位置有我们来控制，所以不仅仅在所有版本中统一了位置的计算方式，而且更重要的是，PopupWindow的`Gravity`这一个属性被充分使用，再也不用去计算心塞的偏移量了。
