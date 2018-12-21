@@ -400,7 +400,7 @@ abstract class BasePopupWindowProxy extends PopupWindow {
 而对于平时的PopupWindow用法，即PopupWindow不铺满整个屏幕，在BasePopup中则是跟普通用法一样计算offset。
 
 ```java
-	private void onCalculateOffsetAdjust(Point offset, boolean positionMode, boolean relativeToAnchor) {
+    private void onCalculateOffsetAdjust(Point offset, boolean positionMode, boolean relativeToAnchor) {
         int leftMargin = 0;
         int topMargin = 0;
         int rightMargin = 0;
